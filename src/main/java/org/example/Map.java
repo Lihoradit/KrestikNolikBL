@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class Map extends JPanel {
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Date date = new Date();
-    private static final File GAME_LOG = new File("/Users/Horde/IdeaProjects/MyWork/gameLog");
+    private static final File GAME_LOG = new File("/Users/Horde/IdeaProjects/MyWork/gameLog.txt");
     private static final Random rnd = new Random();
     private final int human_dot = 1;
     private static final int bot_dot = 2;
@@ -44,6 +44,7 @@ public class Map extends JPanel {
     }
 
     private int cellWIDTH;
+
 
     Map() {
         setBackground(Color.WHITE);
@@ -83,16 +84,7 @@ public class Map extends JPanel {
                 field[i][j] = empty_dot;
             }
         }
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GAME_LOG, true));
-        ) {
-
-            PrintWriter fileWriter = new PrintWriter(bufferedWriter);
-            fileWriter.print("Новая игра" + "\n Дата сессии: " + df.format(date) + "\n");
-            fileWriter.close();
-        } catch (IOException e) {
-            System.out.println("Файл для записи не найден" + e);
-        }
-
+        writeLog("Новая игра" + "\n Дата сессии: " + df.format(date) + "\n");
     }
 
     private boolean isValidCell(int x, int y) {
@@ -210,17 +202,24 @@ public class Map extends JPanel {
                     g.fillOval(i * cellWIDTH + DOT_PADDING, j * cellHEIGHT + DOT_PADDING,
                             cellWIDTH - DOT_PADDING * 2,
                             cellHEIGHT - DOT_PADDING * 2);
+                    writeLog("Победил чоловик");
+
+
                 } else if (field[j][i] == bot_dot) {
                     g.setColor(Color.RED);
                     g.fillOval(i * cellWIDTH + DOT_PADDING, j * cellHEIGHT + DOT_PADDING,
                             cellWIDTH - DOT_PADDING * 2,
                             cellHEIGHT - DOT_PADDING * 2);
+                    writeLog("Победил ботик");
                 } else {
                     throw new RuntimeException("???????");
                 }
             }
         }
-        if (isGameOver) showMessageGameOver(g);
+        if (isGameOver) {
+            writeLog("Победила дружба");
+            showMessageGameOver(g);
+        }
     }
 
     private void showMessageGameOver(Graphics g) {
@@ -231,6 +230,7 @@ public class Map extends JPanel {
         switch (gameOverType) {
             case STATE_DRAW:
                 g.drawString(MSG_NOWIN, 250, getHEIGHT() / 2);
+
                 break;
             case STATE_WIN_HUMAN:
                 g.drawString(MSG_WIN_HUMAN, 250, getHEIGHT() / 2);
@@ -240,6 +240,17 @@ public class Map extends JPanel {
                 break;
             default:
                 throw new RuntimeException("Непонятное состояние игры:" + gameOverType);
+        }
+    }
+    private void writeLog(String msg){
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GAME_LOG, true));
+        ) {
+
+            PrintWriter fileWriter = new PrintWriter(bufferedWriter);
+            fileWriter.print(msg);
+            fileWriter.close();
+        } catch (IOException e) {
+            System.out.println("Файл для записи не найден" + e);
         }
     }
 
